@@ -282,10 +282,6 @@ Built with:
 
 ---
 
-**Ready to get started?** → **Quick Start Guide in the repository's `docs/` folder**
-
-**Want to understand the system?** → **Architecture Guide in the repository's `docs/` folder**
-
-**Need help?** → **Documentation available in the repository's `docs/` folder**
+ 
 
 <!-- Nicolas Larenas, nlarchive -->
