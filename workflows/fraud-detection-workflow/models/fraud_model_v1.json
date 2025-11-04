@@ -1,0 +1,314 @@
+{
+  "version": "1.0",
+  "type": "AdaBoostClassifier",
+  "trained_at": "2025-11-01T16:00:52.263Z",
+  "train_size": 16000,
+  "test_size": 4000,
+  "test_accuracy": 0.94375,
+  "model": {
+    "n_estimators": 50,
+    "stumps": [
+      {
+        "feature_index": 0,
+        "threshold": 2.705,
+        "polarity": -1,
+        "alpha": 1.3746605788577302
+      },
+      {
+        "feature_index": 3,
+        "threshold": 5538.115,
+        "polarity": 1,
+        "alpha": 0.09884375433475132
+      },
+      {
+        "feature_index": 4,
+        "threshold": 4.5,
+        "polarity": -1,
+        "alpha": 0.0903043159649297
+      },
+      {
+        "feature_index": 3,
+        "threshold": 8348.915,
+        "polarity": 1,
+        "alpha": 0.052677155474035293
+      },
+      {
+        "feature_index": 0,
+        "threshold": 143.57,
+        "polarity": 1,
+        "alpha": 0.057156291512297765
+      },
+      {
+        "feature_index": 1,
+        "threshold": 0.5,
+        "polarity": 1,
+        "alpha": 0.04324063565952464
+      },
+      {
+        "feature_index": 8,
+        "threshold": 0.6225925613798529,
+        "polarity": -1,
+        "alpha": 0.036430457857317126
+      },
+      {
+        "feature_index": 0,
+        "threshold": 49.864999999999995,
+        "polarity": 1,
+        "alpha": 0.03874388018815759
+      },
+      {
+        "feature_index": 0,
+        "threshold": 37.075,
+        "polarity": -1,
+        "alpha": 0.03113964304405156
+      },
+      {
+        "feature_index": 7,
+        "threshold": 86.91,
+        "polarity": -1,
+        "alpha": 0.02862366973383575
+      },
+      {
+        "feature_index": 7,
+        "threshold": 131.655,
+        "polarity": 1,
+        "alpha": 0.03257981440997336
+      },
+      {
+        "feature_index": 0,
+        "threshold": 46.305,
+        "polarity": 1,
+        "alpha": 0.03152565422456022
+      },
+      {
+        "feature_index": 8,
+        "threshold": 0.7277923776183632,
+        "polarity": -1,
+        "alpha": 0.024445270970434595
+      },
+      {
+        "feature_index": 7,
+        "threshold": 86.91,
+        "polarity": -1,
+        "alpha": 0.030970759075037227
+      },
+      {
+        "feature_index": 7,
+        "threshold": 18.325,
+        "polarity": -1,
+        "alpha": 0.02489459518376282
+      },
+      {
+        "feature_index": 7,
+        "threshold": 37.254999999999995,
+        "polarity": 1,
+        "alpha": 0.03033384655739326
+      },
+      {
+        "feature_index": 3,
+        "threshold": 9015.225,
+        "polarity": -1,
+        "alpha": 0.02426378484784841
+      },
+      {
+        "feature_index": 3,
+        "threshold": 14854.880000000001,
+        "polarity": 1,
+        "alpha": 0.025660436631571977
+      },
+      {
+        "feature_index": 3,
+        "threshold": 5538.115,
+        "polarity": 1,
+        "alpha": 0.03557999555567546
+      },
+      {
+        "feature_index": 7,
+        "threshold": 26.59,
+        "polarity": -1,
+        "alpha": 0.02946462992812993
+      },
+      {
+        "feature_index": 4,
+        "threshold": 10.5,
+        "polarity": 1,
+        "alpha": 0.02394817691782157
+      },
+      {
+        "feature_index": 4,
+        "threshold": 7.5,
+        "polarity": -1,
+        "alpha": 0.028993122798498517
+      },
+      {
+        "feature_index": 4,
+        "threshold": 2.5,
+        "polarity": 1,
+        "alpha": 0.03061583330843983
+      },
+      {
+        "feature_index": 5,
+        "threshold": 0.5,
+        "polarity": 1,
+        "alpha": 0.02223167956183423
+      },
+      {
+        "feature_index": 2,
+        "threshold": 0.5,
+        "polarity": 1,
+        "alpha": 0.019070199799139716
+      },
+      {
+        "feature_index": 3,
+        "threshold": 7233.985,
+        "polarity": -1,
+        "alpha": 0.019589859429501238
+      },
+      {
+        "feature_index": 2,
+        "threshold": 1.5,
+        "polarity": -1,
+        "alpha": 0.020833661167465562
+      },
+      {
+        "feature_index": 8,
+        "threshold": 2.0912462476890123,
+        "polarity": 1,
+        "alpha": 0.01665022013364432
+      },
+      {
+        "feature_index": 8,
+        "threshold": 2.558559267568615,
+        "polarity": -1,
+        "alpha": 0.023477538324355562
+      },
+      {
+        "feature_index": 8,
+        "threshold": 4.065549814624911,
+        "polarity": 1,
+        "alpha": 0.023750767916710987
+      },
+      {
+        "feature_index": 1,
+        "threshold": 0.5,
+        "polarity": 1,
+        "alpha": 0.024871398356099604
+      },
+      {
+        "feature_index": 7,
+        "threshold": 120.265,
+        "polarity": 1,
+        "alpha": 0.02280397739023647
+      },
+      {
+        "feature_index": 7,
+        "threshold": 91.34,
+        "polarity": -1,
+        "alpha": 0.01948449098565816
+      },
+      {
+        "feature_index": 7,
+        "threshold": 40.775000000000006,
+        "polarity": 1,
+        "alpha": 0.01839389525520659
+      },
+      {
+        "feature_index": 0,
+        "threshold": 847.3399999999999,
+        "polarity": 1,
+        "alpha": 0.022234993190663153
+      },
+      {
+        "feature_index": 3,
+        "threshold": 15308.395,
+        "polarity": -1,
+        "alpha": 0.021337940675101672
+      },
+      {
+        "feature_index": 3,
+        "threshold": 14854.880000000001,
+        "polarity": 1,
+        "alpha": 0.022252566202745797
+      },
+      {
+        "feature_index": 3,
+        "threshold": 15308.395,
+        "polarity": -1,
+        "alpha": 0.019276433965051135
+      },
+      {
+        "feature_index": 7,
+        "threshold": 20.064999999999998,
+        "polarity": -1,
+        "alpha": 0.019272811692374447
+      },
+      {
+        "feature_index": 1,
+        "threshold": 0.5,
+        "polarity": 1,
+        "alpha": 0.017800066092698675
+      },
+      {
+        "feature_index": 4,
+        "threshold": 7.5,
+        "polarity": -1,
+        "alpha": 0.017121730699095908
+      },
+      {
+        "feature_index": 4,
+        "threshold": 10.5,
+        "polarity": 1,
+        "alpha": 0.02597774560299603
+      },
+      {
+        "feature_index": 4,
+        "threshold": 13.5,
+        "polarity": -1,
+        "alpha": 0.020878853678923254
+      },
+      {
+        "feature_index": 4,
+        "threshold": 22.5,
+        "polarity": 1,
+        "alpha": 0.018097456593492194
+      },
+      {
+        "feature_index": 8,
+        "threshold": 3.0246959647823664,
+        "polarity": -1,
+        "alpha": 0.017941178476777175
+      },
+      {
+        "feature_index": 8,
+        "threshold": 2.0912462476890123,
+        "polarity": 1,
+        "alpha": 0.020200959990555083
+      },
+      {
+        "feature_index": 8,
+        "threshold": 2.558559267568615,
+        "polarity": -1,
+        "alpha": 0.018379353476608528
+      },
+      {
+        "feature_index": 8,
+        "threshold": 4.065549814624911,
+        "polarity": 1,
+        "alpha": 0.018176404528185724
+      },
+      {
+        "feature_index": 3,
+        "threshold": 505.52,
+        "polarity": 1,
+        "alpha": 0.014946468664431459
+      },
+      {
+        "feature_index": 3,
+        "threshold": 6707.63,
+        "polarity": -1,
+        "alpha": 0.016512591163711263
+      }
+    ]
+  }
+}
+

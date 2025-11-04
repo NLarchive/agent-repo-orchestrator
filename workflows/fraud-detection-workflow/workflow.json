@@ -1,0 +1,96 @@
+{
+  "name": "real-time-fraud-detection",
+  "description": "Real-time fraud detection system that analyzes transaction patterns, applies machine learning models, and triggers automated responses to suspicious activities",
+  "steps": [
+    {
+      "id": "collect-transaction-data",
+      "plugin": "postgres",
+      "action": "select",
+      "input": {
+        "table": "orchestrator.transactions",
+        "where": {
+          "processed_at": null
+        },
+        "limit": 5,
+        "columns": ["id", "customer_id", "amount"]
+      }
+    },
+    {
+      "id": "enrich-transaction-data",
+      "plugin": "postgres",
+      "action": "select",
+      "needs": ["collect-transaction-data"],
+      "input": {
+        "table": "orchestrator.customer_profiles",
+        "where": {},
+        "limit": 10,
+        "columns": ["customer_id", "risk_score"]
+      }
+    },
+    {
+      "id": "apply-fraud-models",
+      "plugin": "pathway",
+      "action": "runPipeline",
+      "needs": ["collect-transaction-data", "enrich-transaction-data"],
+      "input": {
+        "pipelineId": "fraud-detection-pipeline",
+        "input": {
+          "transactions": "{{ steps.collect-transaction-data.result }}",
+          "customerProfiles": "{{ steps.enrich-transaction-data.result }}",
+          "rules": {
+            "velocityCheck": { "maxTransactionsPerHour": 10, "amountThreshold": 5000 },
+            "geographicAnomaly": { "maxDistanceKm": 500 },
+            "amountAnomaly": { "deviationThreshold": 3.0 },
+            "timePattern": { "unusualHours": [1, 2, 3, 4, 5] }
+          }
+        }
+      }
+    },
+    {
+      "id": "evaluate-risk-scores",
+      "plugin": "pathway",
+      "action": "runPipeline",
+      "needs": ["apply-fraud-models"],
+      "input": {
+        "pipelineId": "risk-scoring-pipeline",
+        "input": {
+          "fraudAnalysis": "{{ steps.apply-fraud-models.result }}",
+          "thresholds": {
+            "low": 0.3,
+            "medium": 0.6,
+            "high": 0.8,
+            "critical": 0.95
+          }
+        }
+      }
+    },
+    {
+      "id": "store-fraud-alerts",
+      "plugin": "minio",
+      "action": "putObject",
+      "needs": ["evaluate-risk-scores"],
+      "input": {
+        "key": "fraud-alerts/{{ 'now' | date('YYYY-MM-DD/HH') }}/alerts-{{ 'now' | date('YYYYMMDDHHmmss') }}.json",
+        "data": "{{ steps.evaluate-risk-scores.result }}"
+      }
+    },
+    {
+      "id": "trigger-automated-responses",
+      "plugin": "nats",
+      "action": "publish",
+      "needs": ["evaluate-risk-scores"],
+      "input": {
+        "subject": "fraud.alerts",
+        "message": {
+          "alertId": "alert-12345",
+          "timestamp": "2025-10-31T12:57:00Z",
+          "riskLevel": "medium",
+          "transactionIds": [1, 2, 3],
+          "recommendedActions": ["review", "block"],
+          "confidence": 0.85
+        }
+      }
+    }
+  ]
+}
+

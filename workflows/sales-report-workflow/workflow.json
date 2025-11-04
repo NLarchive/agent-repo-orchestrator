@@ -1,0 +1,68 @@
+{
+  "name": "automated-sales-report",
+  "description": "Generates daily sales reports by querying transaction data, processing with Pathway ETL, storing reports in MinIO, logging completion, and sending notifications",
+  "steps": [
+    {
+      "id": "query-sales-data",
+      "plugin": "postgres",
+      "action": "select",
+      "input": {
+        "table": "orchestrator.events",
+        "where": {},
+        "limit": 10
+      }
+    },
+    {
+      "id": "generate-report",
+      "plugin": "pathway",
+      "action": "runPipeline",
+      "needs": ["query-sales-data"],
+      "input": {
+        "pipelineId": "sales-aggregation-pipeline",
+        "input": {
+          "salesData": "{{ steps.query-sales-data.result }}",
+          "reportType": "daily-summary",
+          "includeMetrics": ["totalRevenue", "topProducts", "regionalBreakdown"]
+        }
+      }
+    },
+    {
+      "id": "store-report",
+      "plugin": "minio",
+      "action": "putObject",
+      "needs": ["generate-report"],
+      "input": {
+        "key": "reports/daily-sales-2025-10-31.json",
+        "data": "{{ steps.generate-report.result }}"
+      }
+    },
+    {
+      "id": "log-completion",
+      "plugin": "postgres",
+      "action": "insert",
+      "needs": ["store-report"],
+      "input": {
+        "table": "orchestrator.events",
+        "data": {
+          "event_type": "report_generated",
+          "data": "{\"reportType\": \"daily-sales\", \"date\": \"2025-10-31\", \"status\": \"completed\"}"
+        }
+      }
+    },
+    {
+      "id": "send-notification",
+      "plugin": "nats",
+      "action": "publish",
+      "needs": ["log-completion"],
+      "input": {
+        "subject": "reports.sales.daily",
+        "message": {
+          "type": "report_ready",
+          "reportKey": "reports/daily-sales-2025-10-31.json",
+          "generatedAt": "2025-10-31T12:00:00Z",
+          "summary": "Daily sales report generated and stored successfully"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+services:
+  # ========== Stack A Services ==========
+  # SECURITY WARNING: Update credentials before production use!
+  # Default credentials are for development/testing only.
+  
+  nats:
+    image: nats:latest
+    container_name: orchestrator-nats
+    ports:
+      - "4222:4222"    # Client port
+      - "6222:6222"    # Cluster port
+      - "8222:8222"    # Monitoring port
+    command: -m 8222 --jetstream
+    networks:
+      - orchestrator-network
+    environment:
+      - NATS_URL=nats://nats:4222
+
+  postgres:
+    image: bitnami/postgresql:latest
+    container_name: orchestrator-postgres
+    environment:
+      - POSTGRESQL_USERNAME=orchestrator_user
+      - POSTGRESQL_PASSWORD=orchestrator_password
+      - POSTGRESQL_DATABASE=orchestrator_db
+      - POSTGRESQL_POSTGRES_PASSWORD=postgres_password
+      - POSTGRESQL_ALLOW_REMOTE_CONNECTIONS=yes
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/bitnami/postgresql
+      - ./orchestrator/db/postgres_init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - orchestrator-network
+      
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: orchestrator-postgres-exporter
+    environment:
+      # DSN format: postgresql://user:password@host:port/dbname?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://orchestrator_user:orchestrator_password@postgres:5432/orchestrator_db?sslmode=disable
+    ports:
+      - "9187:9187"
+    networks:
+      - orchestrator-network
+    depends_on:
+      - postgres
+
+  minio:
+    image: minio/minio:latest
+    container_name: orchestrator-minio
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin_password
+      - MINIO_BROWSER=on
+    ports:
+      - "9000:9000"    # API port
+      - "9001:9001"    # Console port
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - orchestrator-network
+
+  pathway:
+    image: python:3.11-slim
+    container_name: orchestrator-pathway
+    ports:
+      - "8000:8000"    # API port
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./orchestrator/mocks/pathway-mock:/app
+      - pathway_data:/data
+    working_dir: /app
+    command: python simple_server.py
+    networks:
+      - orchestrator-network
+
+  # ========== Monitoring Stack ==========
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: orchestrator-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus-alerts.yml:/etc/prometheus/prometheus-alerts.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - orchestrator-network
+    depends_on:
+      - orchestrator
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: orchestrator-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=redis-datasource
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./workflows/fraud-detection-workflow/dashboards:/etc/grafana/provisioning/dashboards
+      - ./workflows/fraud-detection-workflow/dashboards/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    networks:
+      - orchestrator-network
+    depends_on:
+      - prometheus
+
+  # ========== Orchestrator Service ==========
+  
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestrator
+    container_name: orchestrator-api
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - MOCK_METRICS=true
+      - DB_FILE=/data/orchestrator.db
+      - LOG_FILE=/logs/orchestrator.log
+      - NATS_URL=nats://nats:4222
+      - STREAMER=nats
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=orchestrator_db
+      - POSTGRES_USER=orchestrator_user
+      - POSTGRES_PASSWORD=orchestrator_password
+      - MINIO_HOST=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin_password
+      - PATHWAY_URL=http://pathway:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./orchestrator:/workspace/orchestrator
+      - ./package.json:/workspace/package.json
+      - ./package-lock.json:/workspace/package-lock.json
+      - ./.env.example:/workspace/.env
+      - orchestrator_data:/data
+      - orchestrator_logs:/logs
+    working_dir: /workspace
+    command: npm start
+    networks:
+      - orchestrator-network
+
+networks:
+  orchestrator-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  minio_data:
+    driver: local
+  pathway_data:
+    driver: local
+  orchestrator_data:
+    driver: local
+  orchestrator_logs:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# Nicolas Larenas, nlarchive

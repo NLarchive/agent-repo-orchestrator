@@ -1,0 +1,86 @@
+# ===== DEPENDENCIES & BUILD =====
+node_modules/
+dist/
+build/
+.nyc_output/
+
+# ===== ENVIRONMENT & SECRETS =====
+.env
+.env.local
+.env.*.local
+.env.*.example.local
+add-signature/
+# ===== RUNTIME & LOGS =====
+*.log
+orchestrator/logs/*.log
+orchestrator/logs/
+integration-test-results.log
+
+# ===== DATABASE & STATE =====
+orchestrator/data/*.db
+orchestrator/data/*.db-*
+orchestrator/data/
+*.db
+
+# ===== EDITOR & IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# ===== TEST COVERAGE & ARTIFACTS =====
+coverage/
+.nyc_output/
+test-results.json
+*.gcov
+
+# ===== PRIVATE BUSINESS DOCUMENTATION =====
+# Monetization strategy, pricing, revenue models - FOR INTERNAL/CLIENT USE ONLY
+# ===== INTERNAL PROCESS DOCUMENTATION =====
+# Project structure, documentation organization, internal references
+
+# ===== INTERNAL ANALYSIS & PROJECT STATE =====
+# Internal incident analysis, progress tracking, development logs
+docs/
+AGENTS.md
+tasks-project-state/
+
+# ===== WORKFLOW-SPECIFIC INTERNAL DOCS =====
+# Investor presentations, business analysis, internal metrics
+workflows/fraud-detection-workflow/docs/
+workflows/fraud-detection-workflow/tasks-project-state/
+workflows/fraud-detection-workflow/metrics/
+
+# ===== OTHER WORKFLOW OUTPUTS =====
+workflows/*/outputs/
+workflows/*/metrics/
+workflows/*/tasks-project-state/
+
+# ===== LEGACY/ARCHIVED DOCS IN WORKFLOWS =====
+workflows/fraud-detection-workflow/docs/
+
+# ===== EXTERNAL REPOS - KEEP README, EXCLUDE ALL SUBFOLDERS =====
+external_repos/minio/
+external_repos/nats-server/
+external_repos/pathway/
+external_repos/postgres/
+
+# ===== TEMPORARY/TEST FILES =====
+*.tmp
+*.temp
+.tmp/
+/tmp/
+test-results/
+**/test-output/
+
+# Nicolas Larenas, nlarchive

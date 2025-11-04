@@ -1,0 +1,40 @@
+{
+  "name": "minio-store-sample",
+  "steps": [
+    {
+      "id": "run-pathway",
+      "plugin": "pathway",
+      "action": "runPipeline",
+      "input": {
+        "pipelineId": "sample-pipeline",
+        "input": {
+          "source": "local",
+          "count": 150
+        }
+      }
+    },
+    {
+      "id": "store-results",
+      "plugin": "minio",
+      "action": "putObject",
+      "needs": ["run-pathway"],
+      "input": {
+        "key": "outputs/minio-store-sample/result.json",
+        "data": "{{ steps.run-pathway.result }}"
+      }
+    },
+    {
+      "id": "emit-event",
+      "plugin": "postgres",
+      "action": "insert",
+      "needs": ["store-results"],
+      "input": {
+        "table": "orchestrator.events",
+        "data": {
+          "event_type": "workflow_completed",
+          "data": "{\"workflow\": \"minio-store-sample\"}"
+        }
+      }
+    }
+  ]
+}

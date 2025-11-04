@@ -1,0 +1,222 @@
+groups:
+  - name: orchestrator_alerts
+    interval: 30s
+    rules:
+      # Service availability alerts
+      - alert: OrchestratorDown
+        expr: up{job="orchestrator"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: orchestrator
+        annotations:
+          summary: "Orchestrator service is down"
+          description: "The orchestrator service has been down for more than 1 minute. Instance: {{ $labels.instance }}"
+          
+      - alert: PostgresExporterDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL exporter is down"
+          description: "PostgreSQL metrics are unavailable. The postgres_exporter has been down for more than 1 minute."
+          
+      - alert: NATSMetricsUnavailable
+        expr: up{job="nats"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          component: messaging
+        annotations:
+          summary: "NATS metrics collection unavailable"
+          description: "NATS metrics are not being collected. Verify orchestrator NATS metrics collector is running."
+          
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: monitoring
+        annotations:
+          summary: "Prometheus is down"
+          description: "Prometheus monitoring system is unavailable."
+
+      # Performance alerts
+      - alert: HighErrorRate
+        expr: sum(rate(processing_errors_by_module_total[5m])) > 10
+        for: 3m
+        labels:
+          severity: warning
+          component: orchestrator
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanize }} errors/sec (threshold: 10/sec). Check orchestrator logs for details."
+          
+      - alert: CriticalErrorRate
+        expr: sum(rate(processing_errors_by_module_total[5m])) > 50
+        for: 1m
+        labels:
+          severity: critical
+          component: orchestrator
+        annotations:
+          summary: "Critical error rate detected"
+          description: "Error rate is {{ $value | humanize }} errors/sec (threshold: 50/sec). Immediate investigation required."
+          
+      - alert: LowThroughput
+        expr: current_throughput < 1 and current_throughput > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: orchestrator
+        annotations:
+          summary: "Transaction throughput is critically low"
+          description: "Current throughput is {{ $value | humanize }} TPS (threshold: < 1 TPS). System may be degraded."
+          
+      - alert: NoTransactionActivity
+        expr: rate(transaction_throughput_total[5m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          component: orchestrator
+        annotations:
+          summary: "No transaction activity detected"
+          description: "No transactions have been processed in the last 10 minutes. Verify data ingestion pipeline."
+
+      # Queue and batch processing alerts
+      - alert: AbnormalQueueSize
+        expr: batch_queue_size > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: batch-processing
+        annotations:
+          summary: "Batch queue size is abnormally high"
+          description: "Queue has {{ $value }} items (threshold: > 100). Possible processing bottleneck."
+          
+      - alert: CriticalQueueSize
+        expr: batch_queue_size > 500
+        for: 2m
+        labels:
+          severity: critical
+          component: batch-processing
+        annotations:
+          summary: "Critical batch queue size"
+          description: "Queue has {{ $value }} items (threshold: > 500). System may be unable to keep up with load."
+          
+      - alert: SlowBatchProcessing
+        expr: histogram_quantile(0.95, rate(batch_processing_duration_seconds_bucket[5m])) > 60
+        for: 5m
+        labels:
+          severity: warning
+          component: batch-processing
+        annotations:
+          summary: "Batch processing is slow"
+          description: "P95 batch processing duration is {{ $value | humanize }}s (threshold: > 60s). Performance degradation detected."
+
+      # Fraud detection alerts
+      - alert: HighFraudAlertRate
+        expr: sum(rate(fraud_detection_alerts_generated_total{severity="critical"}[5m])) > 5
+        for: 2m
+        labels:
+          severity: warning
+          component: fraud-detection
+        annotations:
+          summary: "High rate of critical fraud alerts"
+          description: "Critical fraud alerts are being generated at {{ $value | humanize }}/sec (threshold: > 5/sec). Possible fraud attack in progress."
+          
+      - alert: HighTransactionRejectionRate
+        expr: sum(rate(fraud_detection_transactions_rejected_total[5m])) / sum(rate(transaction_throughput_total[5m])) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          component: fraud-detection
+        annotations:
+          summary: "High transaction rejection rate"
+          description: "{{ $value | humanizePercentage }} of transactions are being rejected (threshold: > 20%). Review fraud detection rules."
+
+      # System health alerts  
+      - alert: SystemHealthDegraded
+        expr: system_health_status == 0
+        for: 2m
+        labels:
+          severity: warning
+          component: orchestrator
+        annotations:
+          summary: "System health status is degraded"
+          description: "Overall system health is degraded. Check component health metrics."
+          
+      - alert: SystemHealthDown
+        expr: system_health_status == -1
+        for: 1m
+        labels:
+          severity: critical
+          component: orchestrator
+        annotations:
+          summary: "System health status is DOWN"
+          description: "System health has failed. Immediate action required."
+          
+      - alert: LowTestPassRate
+        expr: test_pass_rate < 80
+        for: 5m
+        labels:
+          severity: warning
+          component: testing
+        annotations:
+          summary: "Test pass rate is low"
+          description: "Test pass rate is {{ $value }}% (threshold: < 80%). Quality issues detected."
+
+      # NATS-specific alerts
+      - alert: NATSHighSubscriptionCount
+        expr: nats_subscriptions_total > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: nats
+        annotations:
+          summary: "NATS subscription count is high"
+          description: "NATS has {{ $value }} subscriptions (threshold: > 1000). Possible resource leak."
+          
+      - alert: NATSNoConnections
+        expr: nats_connections_active == 0
+        for: 5m
+        labels:
+          severity: warning
+          component: nats
+        annotations:
+          summary: "No active NATS connections"
+          description: "NATS server has no active connections. Clients may be disconnected."
+          
+      - alert: NATSServerRestarted
+        expr: nats_server_uptime_seconds < 300
+        for: 1m
+        labels:
+          severity: info
+          component: nats
+        annotations:
+          summary: "NATS server recently restarted"
+          description: "NATS server uptime is {{ $value | humanizeDuration }}. Server was recently restarted."
+
+      # Resource and performance alerts
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 1024
+        for: 5m
+        labels:
+          severity: warning
+          component: orchestrator
+        annotations:
+          summary: "High memory usage"
+          description: "Process memory usage is {{ $value | humanize }}MB (threshold: > 1024MB)."
+          
+      - alert: HighHTTPLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High HTTP request latency"
+          description: "P95 HTTP latency is {{ $value | humanize }}s (threshold: > 5s). API performance degraded."
+
+# Nicolas Larenas, nlarchive

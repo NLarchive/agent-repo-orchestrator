@@ -1,0 +1,50 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'orchestrator-monitor'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+        # - targets: ['alertmanager:9093']
+
+rule_files:
+  - "prometheus-alerts.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'orchestrator'
+    static_configs:
+      - targets: ['orchestrator:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'orchestrator-api'
+
+  - job_name: 'nats'
+    static_configs:
+      # NATS metrics are exported by orchestrator internal collector
+      - targets: ['orchestrator:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    metric_relabel_configs:
+      # Keep only NATS metrics from orchestrator
+      - source_labels: [__name__]
+        regex: 'nats_.*'
+        action: keep
+
+  - job_name: 'postgres'
+    static_configs:
+      # Use the postgres_exporter service; postgres does not expose /metrics directly
+      - targets: ['postgres_exporter:9187']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+
+# Nicolas Larenas, nlarchive

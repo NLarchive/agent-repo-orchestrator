@@ -1,0 +1,35 @@
+FROM node:25-bullseye-slim
+
+WORKDIR /workspace
+
+# Copy package files
+COPY package*.json ./
+
+# Install system build dependencies required for native modules (better-sqlite3)
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends build-essential python3 pkg-config libsqlite3-dev ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# Clean install node dependencies
+RUN npm ci --only=production
+
+# Remove any existing better-sqlite3 binaries and rebuild from source
+RUN rm -rf node_modules/better-sqlite3/build/Release/* \
+  && cd node_modules/better-sqlite3 \
+  && npm run install --build-from-source
+
+# Copy application code
+COPY orchestrator/ ./orchestrator/
+COPY .env.example ./.env
+
+# Create necessary directories
+RUN mkdir -p ./orchestrator/data ./orchestrator/logs
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" || exit 1
+
+# Run the app
+CMD ["npm", "start"]
+
+# Nicolas Larenas, nlarchive
